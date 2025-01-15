@@ -28,8 +28,29 @@ async function run() {
 
 
     const ApartmentsDatabace = client.db("SkylineDb").collection("apartment");
+    const UsersDatabace = client.db("SkylineDb").collection("users");
     // Connect the client to the server	(optional starting in v4.7)
+// users api
 
+app.post('/users',async(req,res)=>{
+  const userData = req.body
+  const query = {email:users.email}
+  const existinguser = await UsersDatabace.findOne(query)
+  if(existinguser){
+    return res.send ({message:'User All ready exist'})
+  }
+  const result = await UsersDatabace.insertOne(userData)
+  res.send(result)
+})
+app.get('/users',async(req,res)=>{
+  const result = await UsersDatabace.find().toArray()
+  res.send(result)
+})
+
+
+
+
+// 
 
     app.get('/apartments',async(req,res)=>{
        
