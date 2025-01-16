@@ -65,6 +65,19 @@ app.get('/users',async(req,res)=>{
   const result = await UsersDatabace.find().toArray()
   res.send(result)
 })
+// member api
+
+app.get('/users/member/:email',async(req,res)=>{
+  const email = req.params.email
+  const query = {userEmail: email}
+  const user = await UsersDatabace.findOne(query)
+  let member = false
+  if(user){
+    member = user?.role ==='member'
+  }
+  res.send({member})
+})
+
 // admin api 
 
 app.get('/users/admin/:email',async(req,res)=>{
