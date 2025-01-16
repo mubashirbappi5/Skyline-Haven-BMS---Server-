@@ -45,6 +45,22 @@ app.post('/users',async(req,res)=>{
   const result = await UsersDatabace.insertOne(userData)
   res.send(result)
 })
+
+app.patch('/users/:email',async(req,res)=>{
+    const email = req.params.email
+    
+    const query ={userEmail:email}
+
+    const updatedoc ={
+      $set:{
+        role:'member'
+      }
+    }
+    const result = await UsersDatabace.updateOne(query,updatedoc)
+    res.send(result)
+
+})
+
 app.get('/users',async(req,res)=>{
   const result = await UsersDatabace.find().toArray()
   res.send(result)
