@@ -11,7 +11,7 @@ app.use(express.json())
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.S3_BUCKET}:${process.env.SECRET_KEY}@cluster0.ig6ro.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -30,6 +30,7 @@ async function run() {
     const ApartmentsDatabace = client.db("SkylineDb").collection("apartment");
     const UsersDatabace = client.db("SkylineDb").collection("users");
     const AgreementReqDatabace = client.db("SkylineDb").collection("agreeReq");
+    const AcceptedReqDatabace = client.db("SkylineDb").collection("AcceptReq");
     // Connect the client to the server	(optional starting in v4.7)
 // users api
 
@@ -87,7 +88,20 @@ app.get('/request',async(req,res)=>{
   res.send(result)
 })
 
+app.delete('/request/:id',async(req,res)=>{
+  const id = req.params.id
+  const query = { _id: new ObjectId(id) }
+  const result = await AgreementReqDatabace.deleteOne(query)
+  res.send(result)
+})
 
+// accept request api
+
+app.post('/accept',async(req,res)=>{
+  const acceptData = req.body
+  const result = await AcceptedReqDatabace.insertOne(acceptData)
+  res.send(result)
+})
 
 
     // await client.connect();
