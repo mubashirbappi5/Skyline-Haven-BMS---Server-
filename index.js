@@ -34,8 +34,9 @@ async function run() {
 
 app.post('/users',async(req,res)=>{
   const userData = req.body
-  const query = {email:users.email}
+  const query = {userEmail:userData?.userEmail}
   const existinguser = await UsersDatabace.findOne(query)
+  console.log(existinguser)
   if(existinguser){
     return res.send ({message:'User All ready exist'})
   }
@@ -46,7 +47,19 @@ app.get('/users',async(req,res)=>{
   const result = await UsersDatabace.find().toArray()
   res.send(result)
 })
+// admin api 
 
+app.get('/users/admin/:email',async(req,res)=>{
+  const email = req.params.email
+  const query = {userEmail: email };
+  const user = await UsersDatabace.findOne(query);
+  let admin = false;
+  if (user) {
+    admin = user?.role === 'admin';
+  }
+  res.send({ admin });
+ 
+})
 
 
 
