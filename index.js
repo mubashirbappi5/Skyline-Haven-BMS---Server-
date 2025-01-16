@@ -31,6 +31,7 @@ async function run() {
     const UsersDatabace = client.db("SkylineDb").collection("users");
     const AgreementReqDatabace = client.db("SkylineDb").collection("agreeReq");
     const AcceptedReqDatabace = client.db("SkylineDb").collection("AcceptReq");
+    const AnnouncementDatabace = client.db("SkylineDb").collection("notice");
     // Connect the client to the server	(optional starting in v4.7)
 // users api
 
@@ -129,6 +130,25 @@ app.delete('/request/:id',async(req,res)=>{
 app.post('/accept',async(req,res)=>{
   const acceptData = req.body
   const result = await AcceptedReqDatabace.insertOne(acceptData)
+  res.send(result)
+})
+
+app.get('/accept',async(req,res)=>{
+  const result = await AcceptedReqDatabace.find().toArray()
+  res.send(result)
+})
+
+// Make announcement
+
+app.post('/notice',async(req,res)=>{
+  const notice = req.body
+  const result = await AnnouncementDatabace.insertOne(notice)
+  res.send(result)
+
+})
+
+app.get('/notice',async(req,res)=>{
+  const result = await AnnouncementDatabace.find().toArray()
   res.send(result)
 })
 
