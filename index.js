@@ -29,6 +29,7 @@ async function run() {
 
     const ApartmentsDatabace = client.db("SkylineDb").collection("apartment");
     const UsersDatabace = client.db("SkylineDb").collection("users");
+    const AgreementReqDatabace = client.db("SkylineDb").collection("agreeReq");
     // Connect the client to the server	(optional starting in v4.7)
 // users api
 
@@ -70,6 +71,25 @@ app.get('/users/admin/:email',async(req,res)=>{
          const result = await ApartmentsDatabace.find().toArray()
          res.send(result)
        })
+
+
+
+// agreement request api 
+
+app.post('/request',async(req,res)=>{
+  const request = req.body;
+  const result = await AgreementReqDatabace.insertOne(request)
+  res.send(result)
+})
+
+app.get('/request',async(req,res)=>{
+  const result = await AgreementReqDatabace.find().toArray()
+  res.send(result)
+})
+
+
+
+
     // await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
