@@ -32,6 +32,7 @@ async function run() {
     const AgreementReqDatabace = client.db("SkylineDb").collection("agreeReq");
     const AcceptedReqDatabace = client.db("SkylineDb").collection("AcceptReq");
     const AnnouncementDatabace = client.db("SkylineDb").collection("notice");
+    const CouponDatabace = client.db("SkylineDb").collection("coupon");
     // Connect the client to the server	(optional starting in v4.7)
 // users api
 
@@ -149,6 +150,14 @@ app.post('/notice',async(req,res)=>{
 
 app.get('/notice',async(req,res)=>{
   const result = await AnnouncementDatabace.find().toArray()
+  res.send(result)
+})
+
+// coupon api 
+
+app.post('/coupons',async(req,res)=>{
+  const couponsData = req.body
+  const result = await CouponDatabace.insertOne(couponsData)
   res.send(result)
 })
 
