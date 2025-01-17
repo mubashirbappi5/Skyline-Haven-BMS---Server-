@@ -139,6 +139,14 @@ app.get('/accept',async(req,res)=>{
   res.send(result)
 })
 
+app.get('/accept/:email',async(req,res)=>{
+  const email = req.params.email
+  const query = {userEmail: email };
+  const result = await AcceptedReqDatabace.find(query).toArray()
+  res.send(result)
+  
+})
+
 // Make announcement
 
 app.post('/notice',async(req,res)=>{
