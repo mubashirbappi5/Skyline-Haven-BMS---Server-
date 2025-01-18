@@ -49,20 +49,20 @@ async function run() {
     })
 
 
-    // const verifyToken = (req, res, next) => {
-    //   console.log('inside verify token', req.headers.authorization);
-    //   if (!req.headers.authorization) {
-    //     return res.status(401).send({ message: 'unauthorized access' });
-    //   }
-    //   const token = req.headers.authorization.split(' ')[1];
-    //   jwt.verify(token, process.env.Jwttoken, (err, decoded) => {
-    //     if (err) {
-    //       return res.status(401).send({ message: 'unauthorized access' })
-    //     }
-    //     req.decoded = decoded;
-    //     next();
-    //   })
-    // }   
+    const verifyToken = (req, res, next) => {
+      console.log('inside verify token', req.headers.authorization);
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: 'unauthorized access' });
+      }
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, process.env.Jwttoken, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: 'unauthorized access' })
+        }
+        req.decoded = decoded;
+        next();
+      })
+    }   
 // users api
 
 app.post('/users',async(req,res)=>{
@@ -169,7 +169,7 @@ app.get('/accept',async(req,res)=>{
 })
 
 
-app.get('/accept/:email',async(req,res)=>{
+app.get('/accept/:email',verifyToken,async(req,res)=>{
   const email = req.params.email
   const query = {userEmail: email };
   const result = await AcceptedReqDatabace.find(query).toArray()
