@@ -65,16 +65,27 @@ async function run() {
     }   
 
 
-    // const verifyAdmin = async (req, res, next) => {
-    //   const email = req.decoded.email;
-    //   const query = { email: email };
-    //   const user = await UsersDatabace.findOne(query);
-    //   const isAdmin = user?.role === 'admin';
-    //   if (!isAdmin) {
-    //     return res.status(403).send({ message: 'forbidden access' });
-    //   }
-    //   next();
-    // }
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { userEmail: email };
+      const user = await UsersDatabace.findOne(query);
+      const isAdmin = user?.role === 'admin';
+      if (!isAdmin) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
+      next();
+    }
+
+    const verifyMember = async(req,res, next)=>{
+     const email = req.decoded.email;
+     const query = {userEmail:email}
+     const user = await UsersDatabace.findOne(query)
+     const isMember = user?.role==='member'
+     if(!isMember){
+      return res.status(403).send({ message: 'forbidden access' });
+     }
+     next()
+    }
 // users api
 
 app.post('/users',async(req,res)=>{
@@ -89,7 +100,7 @@ app.post('/users',async(req,res)=>{
   res.send(result)
 })
 
-app.patch('/users/:email',async(req,res)=>{
+app.patch('/users/:email',verifyToken ,verifyAdmin,async(req,res)=>{
     const email = req.params.email
     
     const query ={userEmail:email}
@@ -104,14 +115,18 @@ app.patch('/users/:email',async(req,res)=>{
 
 })
 
-app.get('/users',async(req,res)=>{
+app.get('/users',verifyToken ,verifyAdmin,async(req,res)=>{
   const result = await UsersDatabace.find().toArray()
   res.send(result)
 })
 // member api
 
-app.get('/users/member/:email',async(req,res)=>{
+app.get('/users/member/:email',verifyToken,async(req,res)=>{
   const email = req.params.email
+  
+  if (email !== req.decoded.email) {
+    return res.status(403).send({ message: 'forbidden access' })
+  }
   const query = {userEmail: email}
   const user = await UsersDatabace.findOne(query)
   let member = false
@@ -123,8 +138,11 @@ app.get('/users/member/:email',async(req,res)=>{
 
 // admin api 
 
-app.get('/users/admin/:email',async(req,res)=>{
+app.get('/users/admin/:email',verifyToken ,async(req,res)=>{
   const email = req.params.email
+  if (email !== req.decoded.email) {
+    return res.status(403).send({ message: 'forbidden access' })
+  }
   const query = {userEmail: email };
   const user = await UsersDatabace.findOne(query);
   let admin = false;
@@ -149,18 +167,18 @@ app.get('/users/admin/:email',async(req,res)=>{
 
 // agreement request api 
 
-app.post('/request',async(req,res)=>{
+app.post('/request',verifyToken ,async(req,res)=>{
   const request = req.body;
   const result = await AgreementReqDatabace.insertOne(request)
   res.send(result)
 })
 
-app.get('/request',async(req,res)=>{
+app.get('/request',verifyToken ,verifyAdmin,async(req,res)=>{
   const result = await AgreementReqDatabace.find().toArray()
   res.send(result)
 })
 
-app.delete('/request/:id',async(req,res)=>{
+app.delete('/request/:id',verifyToken,verifyAdmin,async(req,res)=>{
   const id = req.params.id
   const query = { _id: new ObjectId(id) }
   const result = await AgreementReqDatabace.deleteOne(query)
@@ -169,7 +187,7 @@ app.delete('/request/:id',async(req,res)=>{
 
 // accept request api
 
-app.post('/accept',async(req,res)=>{
+app.post('/accept',verifyToken ,verifyAdmin,async(req,res)=>{
   const acceptData = req.body
   const result = await AcceptedReqDatabace.insertOne(acceptData)
   res.send(result)
@@ -181,7 +199,7 @@ app.get('/accept',async(req,res)=>{
 })
 
 
-app.get('/accept/:email',verifyToken,async(req,res)=>{
+app.get('/accept/:email',verifyToken,verifyMember,async(req,res)=>{
   const email = req.params.email
   const query = {userEmail: email };
   const result = await AcceptedReqDatabace.find(query).toArray()
@@ -194,35 +212,35 @@ app.get('/accept/:email',verifyToken,async(req,res)=>{
 
 // Make announcement
 
-app.post('/notice',async(req,res)=>{
+app.post('/notice',verifyToken,verifyAdmin,async(req,res)=>{
   const notice = req.body
   const result = await AnnouncementDatabace.insertOne(notice)
   res.send(result)
 
 })
 
-app.get('/notice',async(req,res)=>{
+app.get('/notice',verifyToken,async(req,res)=>{
   const result = await AnnouncementDatabace.find().toArray()
   res.send(result)
 })
 
 // coupon api 
 
-app.post('/coupons',async(req,res)=>{
+app.post('/coupons',verifyToken,verifyAdmin,async(req,res)=>{
   const couponsData = req.body
   const result = await CouponDatabace.insertOne(couponsData)
   res.send(result)
 })
 
 
-app.get('/coupons',async(req,res)=>{
+app.get('/coupons',verifyToken,async(req,res)=>{
   const result = await CouponDatabace.find().toArray()
   res.send(result)
 })
 
 // payment api 
 
-app.post('/create-payment-intent',async(req,res)=>{
+app.post('/create-payment-intent',verifyToken,verifyMember,async(req,res)=>{
   const {price}=req.body
   const amounts = parseInt(price*100)
   const amount =Math.round(amounts)
@@ -240,7 +258,7 @@ app.post('/create-payment-intent',async(req,res)=>{
   });
 
   })
-  app.post('/payments', async (req, res) => {
+  app.post('/payments',verifyToken,verifyMember, async (req, res) => {
     const payment = req.body;
     const paymentResult = await PaymentDatabace.insertOne(payment);
 
