@@ -55,7 +55,7 @@ async function run() {
         return res.status(401).send({ message: 'unauthorized access' });
       }
       const token = req.headers.authorization.split(' ')[1];
-      jwt.verify(token, process.env.Jwttoken, (err, decoded) => {
+      jwt.verify(token, process.env.JwT_Token, (err, decoded) => {
         if (err) {
           return res.status(401).send({ message: 'unauthorized access' })
         }
@@ -63,6 +63,18 @@ async function run() {
         next();
       })
     }   
+
+
+    // const verifyAdmin = async (req, res, next) => {
+    //   const email = req.decoded.email;
+    //   const query = { email: email };
+    //   const user = await UsersDatabace.findOne(query);
+    //   const isAdmin = user?.role === 'admin';
+    //   if (!isAdmin) {
+    //     return res.status(403).send({ message: 'forbidden access' });
+    //   }
+    //   next();
+    // }
 // users api
 
 app.post('/users',async(req,res)=>{
