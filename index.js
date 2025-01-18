@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const stripe = require("stripe")('sk_test_51QgJiCLxAsBYxwlHOvAlUvLLtCrDu89pqk7QI030rllm3wbFY6KYOxo7IbYG1WjkuSsp3hEM4kfteuVBrjBCy8DU00VxUaJuAY');
 require('dotenv').config()
 const port = process.env.PORT || 7000
 
@@ -33,6 +34,7 @@ async function run() {
     const AcceptedReqDatabace = client.db("SkylineDb").collection("AcceptReq");
     const AnnouncementDatabace = client.db("SkylineDb").collection("notice");
     const CouponDatabace = client.db("SkylineDb").collection("coupon");
+    const PaymentDatabace = client.db("SkylineDb").collection("payment");
     // Connect the client to the server	(optional starting in v4.7)
 // users api
 
@@ -139,6 +141,7 @@ app.get('/accept',async(req,res)=>{
   res.send(result)
 })
 
+
 app.get('/accept/:email',async(req,res)=>{
   const email = req.params.email
   const query = {userEmail: email };
@@ -146,6 +149,9 @@ app.get('/accept/:email',async(req,res)=>{
   res.send(result)
   
 })
+
+
+
 
 // Make announcement
 
@@ -169,6 +175,44 @@ app.post('/coupons',async(req,res)=>{
   res.send(result)
 })
 
+
+app.get('/coupons',async(req,res)=>{
+  const result = await CouponDatabace.find().toArray()
+  res.send(result)
+})
+
+// payment api 
+
+app.post('/create-payment-intent',async(req,res)=>{
+  const {price}=req.body
+  const amounts = parseInt(price*100)
+  const amount =Math.round(amounts)
+  console.log(amount)
+  const paymentIntent = await stripe.paymentIntents.create({
+     amount:amount,
+     currency: "usd",
+     payment_method_types: [
+  "card",
+  
+],
+  })
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+
+  })
+  app.post('/payments', async (req, res) => {
+    const payment = req.body;
+    const paymentResult = await PaymentDatabace.insertOne(payment);
+
+    const id = payment.confim_id
+    console.log('payment info', payment);
+    const query = {_id:new ObjectId(id)}
+      
+    const deleteResult = await AcceptedReqDatabace.deleteOne(query);
+
+    res.send({ paymentResult, deleteResult });
+  })
 
     // await client.connect();
     // Send a ping to confirm a successful connection
