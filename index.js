@@ -1,4 +1,5 @@
 const express = require('express')
+const jwt = require('jsonwebtoken')
 const app = express()
 const cors = require('cors')
 const stripe = require("stripe")('sk_test_51QgJiCLxAsBYxwlHOvAlUvLLtCrDu89pqk7QI030rllm3wbFY6KYOxo7IbYG1WjkuSsp3hEM4kfteuVBrjBCy8DU00VxUaJuAY');
@@ -36,6 +37,32 @@ async function run() {
     const CouponDatabace = client.db("SkylineDb").collection("coupon");
     const PaymentDatabace = client.db("SkylineDb").collection("payment");
     // Connect the client to the server	(optional starting in v4.7)
+
+
+    // JWT Api
+
+
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.JwT_Token, { expiresIn: '2h' });
+      res.send({ token });
+    })
+
+
+    // const verifyToken = (req, res, next) => {
+    //   console.log('inside verify token', req.headers.authorization);
+    //   if (!req.headers.authorization) {
+    //     return res.status(401).send({ message: 'unauthorized access' });
+    //   }
+    //   const token = req.headers.authorization.split(' ')[1];
+    //   jwt.verify(token, process.env.Jwttoken, (err, decoded) => {
+    //     if (err) {
+    //       return res.status(401).send({ message: 'unauthorized access' })
+    //     }
+    //     req.decoded = decoded;
+    //     next();
+    //   })
+    // }   
 // users api
 
 app.post('/users',async(req,res)=>{
