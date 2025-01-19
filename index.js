@@ -288,62 +288,15 @@ app.post('/create-payment-intent',verifyToken,verifyMember,async(req,res)=>{
     const apartmentsPipeline = [
       {
         $facet: {
-          totalApartments: [{ $count: "count" }], // Total apartments
-          unavailableRooms: [
-            {
-              $lookup: {
-                from: "payment", // Match with the PaymentDatabase
-                localField: "_id",
-                foreignField: "apartmentId", // Assuming "apartmentId" links payments to apartments
-                as: "paymentInfo"
-              }
-            },
-            { $match: { paymentInfo: { $ne: [] } } },
-            { $count: "count" }
-          ]
+          totalApartments: [{ $count: "count" }] // Total apartments
         }
       },
       {
         $project: {
-          totalApartments: { $arrayElemAt: ["$totalApartments.count", 0] },
-          unavailableRooms: { $arrayElemAt: ["$unavailableRooms.count", 0] },
-          availableRooms: {
-            $subtract: [
-              { $arrayElemAt: ["$totalApartments.count", 0] },
-              { $arrayElemAt: ["$unavailableRooms.count", 0] }
-            ]
-          },
-          availableRoomsPercentage: {
-            $multiply: [
-              {
-                $divide: [
-                  {
-                    $subtract: [
-                      { $arrayElemAt: ["$totalApartments.count", 0] },
-                      { $arrayElemAt: ["$unavailableRooms.count", 0] }
-                    ]
-                  },
-                  { $arrayElemAt: ["$totalApartments.count", 0] }
-                ]
-              },
-              100
-            ]
-          },
-          unavailableRoomsPercentage: {
-            $multiply: [
-              {
-                $divide: [
-                  { $arrayElemAt: ["$unavailableRooms.count", 0] },
-                  { $arrayElemAt: ["$totalApartments.count", 0] }
-                ]
-              },
-              100
-            ]
-          }
+          totalApartments: { $arrayElemAt: ["$totalApartments.count", 0] }
         }
       }
     ];
-
     const usersPipeline = [
       {
         $facet: {
@@ -362,17 +315,30 @@ app.post('/create-payment-intent',verifyToken,verifyMember,async(req,res)=>{
       }
     ];
 
-    // Execute aggregation pipelines
+    const paymentsPipeline = [
+      {
+        $facet: {
+          totalPayments: [{ $count: "count" }]
+        }
+      },
+      {
+        $project: {
+          totalPayments: { $arrayElemAt: ["$totalPayments.count", 0] }
+        }
+      }
+    ];
+    
+
+    const [paymentsData] = await PaymentDatabace.aggregate(paymentsPipeline).toArray();
+
+    
     const [apartmentsData] = await ApartmentsDatabace.aggregate(apartmentsPipeline).toArray();
     const [usersData] = await UsersDatabace.aggregate(usersPipeline).toArray();
 
-    // Combine results
+    
     res.status(200).send({
       totalApartments: apartmentsData.totalApartments || 0,
-      availableRooms: apartmentsData.availableRooms || 0,
-      unavailableRooms: apartmentsData.unavailableRooms || 0,
-      availableRoomsPercentage: `${apartmentsData.availableRoomsPercentage?.toFixed(2) || "0.00"}%`,
-      unavailableRoomsPercentage: `${apartmentsData.unavailableRoomsPercentage?.toFixed(2) || "0.00"}%`,
+      totalAgreement: paymentsData.totalPayments || 0,
       totalUsers: usersData.totalUsers || 0,
       totalMembers: usersData.totalMembers || 0,
     });
