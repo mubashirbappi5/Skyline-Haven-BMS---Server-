@@ -104,10 +104,10 @@ app.patch('/users/:email',verifyToken ,verifyAdmin,async(req,res)=>{
     const email = req.params.email
     
     const query ={userEmail:email}
-
+    const { role } = req.body;
     const updatedoc ={
       $set:{
-        role:'member'
+         role: role 
       }
     }
     const result = await UsersDatabace.updateOne(query,updatedoc)
@@ -155,7 +155,7 @@ app.get('/users/admin/:email',verifyToken ,async(req,res)=>{
 
 
 
-// 
+// apartments api
 
     app.get('/apartments',async(req,res)=>{
        
@@ -231,9 +231,22 @@ app.post('/coupons',verifyToken,verifyAdmin,async(req,res)=>{
   const result = await CouponDatabace.insertOne(couponsData)
   res.send(result)
 })
+app.patch('/coupons/:id',verifyToken,verifyAdmin,async(req,res)=>{
+  const {status}=req.body
+  const id = req.params.id
+  const query = { _id: new ObjectId(id) }
+  const updatedoc ={
+    $set:{
+      status: status 
+    }
+  }
+  const result =await CouponDatabace.updateOne(query,updatedoc)
+  res.send(result)
+
+})
 
 
-app.get('/coupons',verifyToken,async(req,res)=>{
+app.get('/coupons',async(req,res)=>{
   const result = await CouponDatabace.find().toArray()
   res.send(result)
 })
@@ -283,12 +296,12 @@ app.post('/create-payment-intent',verifyToken,verifyMember,async(req,res)=>{
     res.send(result)
   })
 
-
+// addmin report api
   app.get('/adminreport',async(req,res)=>{
     const apartmentsPipeline = [
       {
         $facet: {
-          totalApartments: [{ $count: "count" }] // Total apartments
+          totalApartments: [{ $count: "count" }] 
         }
       },
       {
