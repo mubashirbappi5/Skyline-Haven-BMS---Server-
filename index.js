@@ -2,7 +2,7 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const app = express()
 const cors = require('cors')
-const stripe = require("stripe")('sk_test_51QgJiCLxAsBYxwlHOvAlUvLLtCrDu89pqk7QI030rllm3wbFY6KYOxo7IbYG1WjkuSsp3hEM4kfteuVBrjBCy8DU00VxUaJuAY');
+const stripe = require("stripe")(process.env.Stribe_Key);
 require('dotenv').config()
 const port = process.env.PORT || 7000
 
@@ -50,7 +50,7 @@ async function run() {
 
 
     const verifyToken = (req, res, next) => {
-      console.log('inside verify token', req.headers.authorization);
+     
       if (!req.headers.authorization) {
         return res.status(401).send({ message: 'unauthorized access' });
       }
@@ -92,7 +92,7 @@ app.post('/users',async(req,res)=>{
   const userData = req.body
   const query = {userEmail:userData?.userEmail}
   const existinguser = await UsersDatabace.findOne(query)
-  console.log(existinguser)
+  
   if(existinguser){
     return res.send ({message:'User All ready exist'})
   }
@@ -257,7 +257,7 @@ app.post('/create-payment-intent',verifyToken,verifyMember,async(req,res)=>{
   const {price}=req.body
   const amounts = parseInt(price*100)
   const amount =Math.round(amounts)
-  console.log(amount)
+  
   const paymentIntent = await stripe.paymentIntents.create({
      amount:amount,
      currency: "usd",
@@ -276,7 +276,7 @@ app.post('/create-payment-intent',verifyToken,verifyMember,async(req,res)=>{
     const paymentResult = await PaymentDatabace.insertOne(payment);
 
     const id = payment.confim_id
-    console.log('payment info', payment);
+    
     const query = {_id:new ObjectId(id)}
       
     const deleteResult = await AcceptedReqDatabace.deleteOne(query);
