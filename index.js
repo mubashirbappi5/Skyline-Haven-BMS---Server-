@@ -2,8 +2,9 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const app = express()
 const cors = require('cors')
-const stripe = require("stripe")(process.env.Stribe_Key);
+
 require('dotenv').config()
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 7000
 
 app.use(cors())
@@ -359,8 +360,8 @@ app.post('/create-payment-intent',verifyToken,verifyMember,async(req,res)=>{
 
     // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
