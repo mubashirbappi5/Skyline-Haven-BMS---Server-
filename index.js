@@ -227,9 +227,14 @@ app.post('/request', verifyToken, async(req,res)=>{
   const request = req.body;
   const result = await prisma.agreementRequest.create({
     data: {
+      userName: request.userName || null,
       userEmail: request.userEmail,
-      apartmentId: request.apartmentId || null,
-      status: request.status || 'pending'
+      floorNo: request.floorNo || null,
+      apartmentNo: request.apartmentNo || null,
+      blockName: request.blockName || null,
+      rent: request.rent || null,
+      apartment_id: request.apartment_id || request.apartmentId || null,
+      status: request.Status || request.status || 'pending'
     }
   });
   res.send(result)
@@ -258,7 +263,8 @@ app.post('/accept', verifyToken, verifyAdmin, async(req,res)=>{
   const result = await prisma.acceptedRequest.create({
     data: {
       userEmail: acceptData.userEmail,
-      apartmentId: acceptData.apartmentId || null,
+      apartmentId: acceptData.apartment_id || acceptData.apartmentId || null,
+      apartmentNo: acceptData.apartmentNo || null,
     }
   });
   res.send(result)
