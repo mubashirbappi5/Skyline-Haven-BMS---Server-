@@ -19,27 +19,36 @@ model User {
 
 model Apartment {
   id          String   @id @default(uuid())
-  title       String
-  description String?
-  price       Float
-  location    String?
+  apartmentNo String
+  blockName   String
+  floorNo     Int
+  rent        Float
+  imageUrl    String?
+  status      String   @default("available")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model AgreementRequest {
-  id          String   @id @default(uuid())
-  userEmail   String
-  apartmentId String?
-  status      String   @default("pending") // e.g., "pending", "approved", "rejected"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  userName           String?
+  userEmail          String
+  floorNo            Int?
+  apartmentNo        String?
+  blockName          String?
+  rent               Float?
+  apartment_id       String?
+  Agreement_req_date DateTime @default(now())
+  status             String   @default("pending")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model AcceptedRequest {
   id          String   @id @default(uuid())
   userEmail   String
   apartmentId String?
+  apartmentNo String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

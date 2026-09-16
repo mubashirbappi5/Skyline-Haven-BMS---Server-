@@ -1,3 +1,4 @@
+global.SlowBuffer = global.Buffer;
 const express = require('express')
 const jwt = require('jsonwebtoken')
 const cors = require('cors')
@@ -143,14 +144,20 @@ app.get('/auth/me', verifyToken, async (req, res) => {
 
 app.post('/users', async(req,res)=>{
   const userData = req.body;
-  const existinguser = await prisma.user.findUnique({ where: { email: userData.userEmail } });
+  const emailToUse = userData.userEmail || userData.email;
+
+  if (!emailToUse) {
+    return res.status(400).send({ message: 'Email is required' });
+  }
+
+  const existinguser = await prisma.user.findUnique({ where: { email: emailToUse } });
   
   if(existinguser){
     return res.send ({message:'User All ready exist'})
   }
   const result = await prisma.user.create({
     data: {
-      email: userData.userEmail,
+      email: emailToUse,
       name: userData.name || '',
       password: '',
       role: 'member'
