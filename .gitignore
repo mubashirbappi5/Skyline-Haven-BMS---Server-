@@ -4,3 +4,5 @@ node_modules
 .agents
 .cursor
 .devin
+
+.claude
