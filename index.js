@@ -1,5 +1,6 @@
 global.SlowBuffer = global.Buffer;
-const express = require('express')
+const express = require('express');
+require('express-async-errors');
 const jwt = require('jsonwebtoken')
 const cors = require('cors')
 const bcrypt = require('bcryptjs')
@@ -343,18 +344,22 @@ app.get('/coupons', async(req,res)=>{
 // ----------------------------------------------------------------------
 
 app.post('/create-payment-intent', verifyToken, verifyMember, async(req,res)=>{
-  const { price } = req.body;
-  const amounts = parseInt(price * 100);
-  const amount = Math.round(amounts);
-  
-  const paymentIntent = await stripe.paymentIntents.create({
-     amount: amount,
-     currency: "usd",
-     payment_method_types: ["card"],
-  });
-  res.send({
-    clientSecret: paymentIntent.client_secret,
-  });
+  try {
+    const { price } = req.body;
+    const amounts = parseInt(price * 100);
+    const amount = Math.round(amounts);
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+       amount: amount,
+       currency: "usd",
+       payment_method_types: ["card"],
+    });
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
 })
 
 app.post('/payments', verifyToken, verifyMember, async (req, res) => {
@@ -415,6 +420,12 @@ app.get('/adminreport', async(req,res)=>{
 app.get('/', (req, res) => {
   res.send('Hello skyline World!')
 })
+
+// Global error handler for unhandled async errors
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).send({ message: err.message || 'Internal Server Error' });
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
