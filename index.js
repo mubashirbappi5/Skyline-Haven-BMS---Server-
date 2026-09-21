@@ -325,7 +325,22 @@ app.get('/accept/:email', verifyToken, verifyMember, async(req,res)=>{
   const result = await prisma.acceptedRequest.findMany({
     where: { userEmail: email }
   });
-  const mapped = result.map(a => ({ ...a, _id: a.id }));
+  
+  const mapped = await Promise.all(result.map(async (a) => {
+    let apartmentData = null;
+    if (a.apartmentId) {
+       apartmentData = await prisma.apartment.findUnique({ where: { id: a.apartmentId }});
+    }
+    return { 
+      ...a, 
+      _id: a.id,
+      rent: apartmentData?.rent || 0,
+      blockName: apartmentData?.blockName || '',
+      floorNo: apartmentData?.floorNo || '',
+      Status: apartmentData?.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'
+    };
+  }));
+  
   res.send(mapped)
 })
 
