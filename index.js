@@ -14,7 +14,14 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 const app = express()
-app.use(cors())
+app.use(cors({
+  origin: [
+    'http://localhost:5173', 
+    'https://skyline-haven-client.vercel.app'
+  ],
+  credentials: true,
+}))
+app.options('*', cors())
 app.use(express.json())
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
