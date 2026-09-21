@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
 
 require('dotenv').config()
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || 'sk_test_fallback');
 const port = process.env.PORT || 7000
 
 const { PrismaClient } = require('@prisma/client')
