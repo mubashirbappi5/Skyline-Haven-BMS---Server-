@@ -220,6 +220,27 @@ app.get('/apartments', async(req,res)=>{
   res.send(mapped)
 })
 
+app.post('/apartments', verifyToken, verifyAdmin, async(req,res)=>{
+  try {
+    const { apartmentNo, blockName, floorNo, rent, imageUrl } = req.body;
+    
+    // Convert floorNo and rent to numbers just in case they are sent as strings
+    const newApartment = await prisma.apartment.create({
+      data: {
+        apartmentNo,
+        blockName,
+        floorNo: parseInt(floorNo),
+        rent: parseFloat(rent),
+        imageUrl
+      }
+    });
+    
+    res.status(201).send(newApartment);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+})
+
 // ----------------------------------------------------------------------
 // AGREEMENT REQUEST API
 // ----------------------------------------------------------------------
@@ -238,6 +259,14 @@ app.post('/request', verifyToken, async(req,res)=>{
       status: request.Status || request.status || 'pending'
     }
   });
+
+  if (request.apartment_id || request.apartmentId) {
+    await prisma.apartment.update({
+      where: { id: request.apartment_id || request.apartmentId },
+      data: { status: 'pending' }
+    }).catch(() => null);
+  }
+
   res.send(result)
 })
 
@@ -268,6 +297,14 @@ app.post('/accept', verifyToken, verifyAdmin, async(req,res)=>{
       apartmentNo: acceptData.apartmentNo || null,
     }
   });
+
+  if (acceptData.apartment_id || acceptData.apartmentId) {
+    await prisma.apartment.update({
+      where: { id: acceptData.apartment_id || acceptData.apartmentId },
+      data: { status: 'booked', bookedBy: acceptData.userEmail }
+    }).catch(() => null);
+  }
+
   res.send(result)
 })
 
@@ -376,6 +413,15 @@ app.post('/payments', verifyToken, verifyMember, async (req, res) => {
 
   let deleteResult = null;
   if (payment.confim_id) {
+    const acceptedReq = await prisma.acceptedRequest.findUnique({
+      where: { id: payment.confim_id }
+    });
+    if (acceptedReq && acceptedReq.apartmentId) {
+      await prisma.apartment.update({
+        where: { id: acceptedReq.apartmentId },
+        data: { paymentStatus: 'paid' }
+      }).catch(() => null);
+    }
     deleteResult = await prisma.acceptedRequest.delete({
       where: { id: payment.confim_id }
     }).catch(() => null);
