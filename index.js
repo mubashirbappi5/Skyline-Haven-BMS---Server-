@@ -7,7 +7,6 @@ const bcrypt = require('bcryptjs')
 const { OAuth2Client } = require('google-auth-library')
 
 require('dotenv').config()
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || 'sk_test_fallback');
 const port = process.env.PORT || 7000
 
 const { PrismaClient } = require('@prisma/client')
@@ -387,19 +386,11 @@ app.get('/coupons', async(req,res)=>{
 // PAYMENT API
 // ----------------------------------------------------------------------
 
+// Dummy payment intent if any client still calls it
 app.post('/create-payment-intent', verifyToken, verifyMember, async(req,res)=>{
   try {
-    const { price } = req.body;
-    const amounts = parseInt(price * 100);
-    const amount = Math.round(amounts);
-    
-    const paymentIntent = await stripe.paymentIntents.create({
-       amount: amount,
-       currency: "usd",
-       payment_method_types: ["card"],
-    });
     res.send({
-      clientSecret: paymentIntent.client_secret,
+      clientSecret: 'dummy_client_secret_no_stripe',
     });
   } catch (error) {
     res.status(500).send({ message: error.message });
