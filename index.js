@@ -366,35 +366,45 @@ app.get('/notice', async(req,res)=>{
 })
 
 // ----------------------------------------------------------------------
-// COUPON API
+// MAINTENANCE REQUEST API
 // ----------------------------------------------------------------------
 
-app.post('/coupons', verifyToken, verifyAdmin, async(req,res)=>{
-  const couponsData = req.body;
-  const result = await prisma.coupon.create({
+app.post('/maintenance', verifyToken, verifyMember, async(req,res)=>{
+  const data = req.body;
+  const result = await prisma.maintenanceRequest.create({
     data: {
-      code: couponsData.code || '',
-      discount: couponsData.discount || 0,
-      status: couponsData.status || 'active'
+      userEmail: data.userEmail,
+      title: data.title,
+      description: data.description,
+      status: 'pending'
     }
   });
   res.send(result)
 })
 
-app.patch('/coupons/:id', verifyToken, verifyAdmin, async(req,res)=>{
+app.get('/maintenance/member/:email', verifyToken, verifyMember, async(req,res)=>{
+  const email = req.params.email;
+  const result = await prisma.maintenanceRequest.findMany({
+    where: { userEmail: email }
+  });
+  const mapped = result.map(a => ({ ...a, _id: a.id }));
+  res.send(mapped)
+})
+
+app.get('/maintenance', verifyToken, verifyAdmin, async(req,res)=>{
+  const result = await prisma.maintenanceRequest.findMany();
+  const mapped = result.map(a => ({ ...a, _id: a.id }));
+  res.send(mapped)
+})
+
+app.patch('/maintenance/:id', verifyToken, verifyAdmin, async(req,res)=>{
   const { status } = req.body;
   const id = req.params.id;
-  const result = await prisma.coupon.update({
+  const result = await prisma.maintenanceRequest.update({
     where: { id },
     data: { status }
   });
   res.send(result)
-})
-
-app.get('/coupons', async(req,res)=>{
-  const result = await prisma.coupon.findMany();
-  const mapped = result.map(a => ({ ...a, _id: a.id }));
-  res.send(mapped)
 })
 
 // ----------------------------------------------------------------------
@@ -466,11 +476,13 @@ app.get('/adminreport', async(req,res)=>{
   const totalApartments = await prisma.apartment.count();
   const totalUsers = await prisma.user.count();
   const totalMembers = await prisma.user.count({ where: { role: 'member' }});
-  const totalPayments = await prisma.payment.count();
+  
+  // Count apartments that are actually booked instead of counting all payments ever made
+  const bookedApartments = await prisma.apartment.count({ where: { status: 'booked' }});
 
   res.status(200).send({
     totalApartments: totalApartments,
-    totalAgreement: totalPayments,
+    totalAgreement: bookedApartments,
     totalUsers: totalUsers,
     totalMembers: totalMembers,
   });
