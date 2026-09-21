@@ -17,10 +17,10 @@ Welcome to the **Skyline Haven Backend**, the API that powers the Skyline Haven 
 2. **Apartment Management**: Fetch apartment listings, including details like rent, location, and availability.
 3. **Rental Request Handling**: Users can submit rental requests for apartments, which are processed and can be accepted or rejected by the admin.
 4. **Admin Dashboard API**: Endpoints for admins to view, approve, or reject rental requests from users.
-5. **Payment Integration**: Payment handling via Stripe for processing rental payments.
-6. **Database Operations**: Prisma ORM with Neon Serverless Postgres used to store user data, apartment details, and rental requests.
-7. **Secure API**: All sensitive endpoints are protected with proper authentication and authorization using JWT middlewares.
-8. **Stripe API**: Integration with Stripe for handling payments, including generating payment intents.
+5. **Maintenance Request System**: Endpoints for members to submit maintenance tickets and for admins to manage and track resolution statuses.
+6. **Payment System**: Simulated dummy payment handling endpoint for residents paying rent (Stripe was removed by client request).
+7. **Database Operations**: Prisma ORM with Neon Serverless Postgres used to store user data, apartment details, and maintenance requests.
+8. **Secure API**: All sensitive endpoints are protected with proper authentication and authorization using JWT middlewares.
 9. **Global Error Handling**: Centralized error handling using `express-async-errors` to gracefully handle promise rejections and timeouts.
 10. **Automated Deployments**: Automated deployment scripts configuration for serverless deployment on Vercel.
 
@@ -30,7 +30,6 @@ Welcome to the **Skyline Haven Backend**, the API that powers the Skyline Haven 
 - **Prisma ORM**: Next-generation Node.js and TypeScript ORM for Neon Postgres.
 - **Neon Postgres**: Serverless Postgres database.
 - **JSON Web Token (JWT)**: For securing routes and verifying user roles.
-- **Stripe**: For secure payment processing.
 - **Bcryptjs**: For password hashing.
 - **Vercel**: Serverless backend hosting.
 
@@ -38,7 +37,7 @@ Welcome to the **Skyline Haven Backend**, the API that powers the Skyline Haven 
 
 1. Clone the repository.
 2. Run `npm install` to install dependencies.
-3. Setup `.env` file with `DATABASE_URL` (Neon Postgres), `JwT_Token`, `STRIPE_SECRET_KEY`, and `GOOGLE_CLIENT_ID`.
+3. Setup `.env` file with `DATABASE_URL` (Neon Postgres), `JwT_Token`, and `GOOGLE_CLIENT_ID`.
 4. Run `npx prisma db push` to sync the database schema.
 5. Run `node index.js` to start the local development server.
 
